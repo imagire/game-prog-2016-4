@@ -4,22 +4,22 @@ using namespace std;
 	class MyQuaternion
 	{
 	public:
-		double Dot(double q1[], double q2[]);
-		void MySlerp(double p[], double q1[], double q2[], double t, double rad);
-		double Sin(double x);
+		static double Dot(const double *q1, const double *q2);
+		static void MySlerp(double *p, const double *q1, const double *q2, double t);
+		static double Sin(double x);
 
 	};
 
-	double MyQuaternion::Dot(double q1[], double q2[])//“ñ‚Â‚ÌƒNƒH[ƒ^ƒjƒIƒ“‚Ì“àÏ‚ğŒvZ
+	double MyQuaternion::Dot(const double *q1, const double *q2)//äºŒã¤ã®ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã®å†…ç©ã‚’è¨ˆç®—
 	{
 		return q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
 	}
-	double MyQuaternion::Sin(double x) {//sin‚Ì’l‚ğŒvZi‹ß—®‚Å‚ ‚ècolnum‚Ì’l‚ª‘å‚«‚¢‚Ù‚Ç³Šmj
+	double MyQuaternion::Sin(double x) {//sinã®å€¤ã‚’è¨ˆç®—ï¼ˆè¿‘ä¼¼å¼ã§ã‚ã‚Šcolnumã®å€¤ãŒå¤§ãã„ã»ã©æ­£ç¢ºï¼‰
 		double s = 0;
 		double r;
 		double e;
 		const int colnum = 100;
-		for (int i = 1; i < colnum; i++) {//sin x = x/1! - x^3/3! + x^5/5! - x^7/7! - c‚Ì—˜—p
+		for (int i = 1; i < colnum; i++) {//sin x = x/1! - x^3/3! + x^5/5! - x^7/7! - â€¦ã®åˆ©ç”¨
 			r = 1;
 			e = 1;
 			for (int j = 0; j < 2 * i - 1; j++)
@@ -35,17 +35,23 @@ using namespace std;
 		return s;
 	}
 
-	void MyQuaternion::MySlerp(double p[], double q1[], double q2[], double t, double rad)//q1,q2‚Ì‹…–ÊüŒ`•âŠÔ‚ğp‚ÉŠi”[‚·‚é
+	void MyQuaternion::MySlerp(double *p, const double *q1, const double *q2, double t)//q1,q2ã®çƒé¢ç·šå½¢è£œé–“ã‚’pã«æ ¼ç´ã™ã‚‹
 	{
-		if (Dot(q1, q2) < 0.00) {//“àÏ‚ª•‰‚Ì’l‚¾‚ÆÅ’Z‚Å‚Í‚È‚¢‚½‚ßƒ}ƒCƒiƒX‚ğŠ|‚¯‚é
+		if (Dot(q1, q2) < 0.0f) {//å†…ç©ãŒè² ã®å€¤ã ã¨æœ€çŸ­ã§ã¯ãªã„ãŸã‚ãƒã‚¤ãƒŠã‚¹ã‚’æ›ã‘ã‚‹
 			q1[0] = -q1[0];
 			q1[1] = -q1[1];
 			q1[2] = -q1[2];
 			q1[3] = -q1[3];
 		}
-		p[0] = Sin((1 - t)*rad) / Sin(rad) * q1[0] + Sin(t*rad) / Sin(rad) * q2[0];
-		p[1] = Sin((1 - t)*rad) / Sin(rad) * q1[1] + Sin(t*rad) / Sin(rad) * q2[1];
-		p[2] = Sin((1 - t)*rad) / Sin(rad) * q1[2] + Sin(t*rad) / Sin(rad) * q2[2];
-		p[3] = Sin((1 - t)*rad) / Sin(rad) * q1[3] + Sin(t*rad) / Sin(rad) * q2[3];
+		
+		double rad = acos(Dot(q1, q2));
+		double sin_rad = Sin(rad);
+		double rate1 = Sin((1 - t)*rad) / sin_rad;
+		double rate2 = Sin(t*rad) / sin_rad;
+		
+		p[0] = rate1 * q1[0] + rate2 * q2[0];
+		p[1] = rate1 * q1[1] + rate2 * q2[1];
+		p[2] = rate1 * q1[2] + rate2 * q2[2];
+		p[3] = rate1 * q1[3] + rate2 * q2[3];
 	}
 	
